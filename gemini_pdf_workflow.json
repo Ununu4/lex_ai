@@ -1,0 +1,122 @@
+{
+  "name": "Gemini Lender PDF QA",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [300, 300],
+      "parameters": {
+        "path": "lender-query",
+        "method": "POST",
+        "responseMode": "onReceived"
+      }
+    },
+    {
+      "id": "2",
+      "name": "Extract Lender + Question",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [540, 300],
+      "parameters": {
+        "functionCode": "const body = items[0].json;\n\n// Expected body:\n// {\n//   \"lender\": \"mulligan\",\n//   \"question\": \"what are minimum revenue requirements?\"\n// }\n\nreturn [{\n  json: {\n    lender: body.lender.toLowerCase(),\n    question: body.question\n  }\n}];"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Google Drive - Search Lender PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [800, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "__REPLACE_WITH_YOUR_CREDENTIAL_ID__"
+        }
+      },
+      "parameters": {
+        "operation": "list",
+        "resource": "file",
+        "filters": {
+          "q": "name contains '{{$json[\"lender\"]}}' and mimeType='application/pdf' and '1fnr6bALaCZGfEPmPCRt51kqB1I8KtGtI' in parents"
+        }
+      }
+    },
+    {
+      "id": "4",
+      "name": "Google Drive - Download PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [1060, 300],
+      "credentials": {
+        "googleApi": {
+          "id": "__REPLACE_WITH_YOUR_CREDENTIAL_ID__"
+        }
+      },
+      "parameters": {
+        "operation": "download",
+        "resource": "file",
+        "fileId": "={{$json[\"id\"]}}",
+        "binaryProperty": "pdf"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Gemini - Upload PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1320, 300],
+      "parameters": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/files?key={{$env.N8N_GEMINI_API_KEY}}",
+        "method": "POST",
+        "sendBinaryData": true,
+        "binaryPropertyName": "pdf"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Gemini - Ask Question",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1560, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{\"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\" + $env.N8N_GEMINI_API_KEY}}",
+        "jsonParameters": true,
+        "options": {},
+        "body": "={\n  \"contents\": [{\n    \"parts\": [{\"text\": \"Use ONLY the contents of the uploaded lender PDF to answer the following question: '\" + $json[\"question\"] + \"'.\"}]\n  }],\n  \"tools\": [{\n    \"googleSearchRetrieval\": {}\n  }],\n  \"fileIds\": [ $item(0).$node[\"Gemini - Upload PDF\"].json.name ]\n}"
+      }
+    },
+    {
+      "id": "7",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.webhookRespond",
+      "typeVersion": 1,
+      "position": [1800, 300],
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Extract Lender + Question", "type": "main", "index": 0 }]]
+    },
+    "Extract Lender + Question": {
+      "main": [[{ "node": "Google Drive - Search Lender PDF", "type": "main", "index": 0 }]]
+    },
+    "Google Drive - Search Lender PDF": {
+      "main": [[{ "node": "Google Drive - Download PDF", "type": "main", "index": 0 }]]
+    },
+    "Google Drive - Download PDF": {
+      "main": [[{ "node": "Gemini - Upload PDF", "type": "main", "index": 0 }]]
+    },
+    "Gemini - Upload PDF": {
+      "main": [[{ "node": "Gemini - Ask Question", "type": "main", "index": 0 }]]
+    },
+    "Gemini - Ask Question": {
+      "main": [[{ "node": "Webhook Response", "type": "main", "index": 0 }]]
+    }
+  }
+}

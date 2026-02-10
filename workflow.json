@@ -1,0 +1,127 @@
+{
+    "name": "Gemini Native PDF Q&A",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "gemini-pdf-query"
+        },
+        "id": "Webhook_Trigger",
+        "name": "Webhook Trigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "operation": "search",
+          "filters": {
+            "name": "={{$json[\"body\"][\"lender\"]}}.pdf"
+          }
+        },
+        "id": "Google_Drive_Search",
+        "name": "Google Drive - Find PDF",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 1,
+        "credentials": {
+          "googleDriveOAuth2Api": "Your Google Drive Credentials"
+        }
+      },
+      {
+        "parameters": {
+          "operation": "download",
+          "fileId": "={{$json[\"id\"]}}",
+          "binaryData": true
+        },
+        "id": "Google_Drive_Download",
+        "name": "Google Drive - Download PDF",
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 1,
+        "credentials": {
+          "googleDriveOAuth2Api": "Your Google Drive Credentials"
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://generativelanguage.googleapis.com/v1beta/files?key=AIzaSyAZyy4xAZM0cvmMpSK4mIBRah95GwN89Nw",
+          "method": "POST",
+          "sendBinaryData": true,
+          "binaryPropertyName": "data"
+        },
+        "id": "Gemini_File_Upload",
+        "name": "Upload PDF to Gemini",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "url": "={{\"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAZyy4xAZM0cvmMpSK4mIBRah95GwN89Nw\"}}",
+          "method": "POST",
+          "jsonParameters": true,
+          "options": {},
+          "body": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"fileData\": {\n            \"mimeType\": \"application/pdf\",\n            \"fileUri\": $json[\"uri\"]\n          }\n        },\n        {\n          \"text\": \"User question: \" + $json[\"body\"][\"query\"]\n        }\n      ]\n    }\n  ]\n}"
+        },
+        "id": "Gemini_Query",
+        "name": "Ask Gemini About PDF",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "responseMode": "lastNode",
+          "responseData": "={{ $json }}"
+        },
+        "id": "Webhook_Response",
+        "name": "Webhook Response",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1
+      }
+    ],
+    "connections": {
+      "Webhook Trigger": {
+        "main": [
+          [
+            {
+              "node": "Google Drive - Find PDF"
+            }
+          ]
+        ]
+      },
+      "Google Drive - Find PDF": {
+        "main": [
+          [
+            {
+              "node": "Google Drive - Download PDF"
+            }
+          ]
+        ]
+      },
+      "Google Drive - Download PDF": {
+        "main": [
+          [
+            {
+              "node": "Upload PDF to Gemini"
+            }
+          ]
+        ]
+      },
+      "Upload PDF to Gemini": {
+        "main": [
+          [
+            {
+              "node": "Ask Gemini About PDF"
+            }
+          ]
+        ]
+      },
+      "Ask Gemini About PDF": {
+        "main": [
+          [
+            {
+              "node": "Webhook Response"
+            }
+          ]
+        ]
+      }
+    }
+  }
+  

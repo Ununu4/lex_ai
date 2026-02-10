@@ -1,0 +1,86 @@
+# LEX - Lender Eligibility X
+# Git Ignore File
+
+# ==================================================
+# SENSITIVE FILES - NEVER COMMIT THESE!
+# ==================================================
+.env
+.env.local
+.env.*.local
+*.key
+secrets.toml
+.streamlit/secrets.toml
+
+# ==================================================
+# PYTHON
+# ==================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ==================================================
+# IDE / EDITOR
+# ==================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ==================================================
+# STREAMLIT
+# ==================================================
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# ==================================================
+# LOGS & TEMP FILES
+# ==================================================
+*.log
+logs/
+temp/
+tmp/
+
+# ==================================================
+# OS FILES
+# ==================================================
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# ==================================================
+# PROJECT SPECIFIC
+# ==================================================
+# Large zip files (already have PDFs)
+*.zip
+
+# Backup files
+*.bak
+*.backup
+
+# Local test files
+test_*.py
+scratch.py
+
