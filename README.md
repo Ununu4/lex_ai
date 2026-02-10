@@ -56,12 +56,19 @@
    # GEMINI_API_KEY=your_actual_api_key_here
    ```
 
-5. **Run the application**
+5. **Add lender PDF files**
+   ```bash
+   # IMPORTANT: Add your lender guideline PDFs to the lender_pdf_database/ folder
+   # The repository does not include PDF files - you must provide your own
+   # See lender_pdf_database/README.md for detailed instructions
+   ```
+
+6. **Run the application**
    ```bash
    streamlit run app.py
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    - Navigate to: `http://localhost:8501`
    - Login with any email and password: `lex444`
 
@@ -147,10 +154,9 @@ lex_ai/
 ├── .gitignore               # Git ignore rules
 ├── README.md                # This file
 ├── logo.png                 # LEX branding
-└── lender_pdf_database/     # Lender guideline PDFs
-    ├── mulligan.pdf
-    ├── kapitus.pdf
-    └── ... (90+ lenders)
+└── lender_pdf_database/     # Lender guideline PDFs (add your own)
+    ├── README.md            # PDF setup instructions
+    └── ... (place your PDFs here)
 ```
 
 ---
@@ -188,10 +194,13 @@ lex_ai/
 **Problem**: Can't find lender PDFs
 
 **Solution**:
-1. Check `LENDER_PDF_DIR` path in `.env`
-2. Ensure `lender_pdf_database/` folder exists
-3. Verify PDFs are in the directory
-4. Use absolute path if needed
+1. **Add PDF files** to `lender_pdf_database/` folder (see `lender_pdf_database/README.md`)
+2. Check `LENDER_PDF_DIR` path in `.env`
+3. Ensure `lender_pdf_database/` folder exists
+4. Verify at least one PDF is in the directory
+5. Use absolute path if needed
+
+**Note**: This repository does not include PDF files. You must provide your own lender guideline PDFs.
 
 ### API Key Not Being Read
 
