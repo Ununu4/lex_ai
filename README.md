@@ -298,16 +298,7 @@ This is a private internal tool for Monet Capital. If you have access:
 
 ---
 
-## 📄 License
 
-Proprietary - Internal use only at Monet Capital.
-
----
-
-## 👨‍💻 Credits
-
-**Developed by Otto**  
-**Powered by Octophy Solutions** 🦑
 
 Built with:
 - [Streamlit](https://streamlit.io/) - Web framework
@@ -336,5 +327,5 @@ For issues or questions:
 
 ---
 
-**Made with 🕷️ by LEX - Your Expert Lender Advisor**
+
 
